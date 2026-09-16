@@ -1,0 +1,6 @@
+{
+  "name": "StickTalk Studio",
+  "description": "Create educational and meme stickman animations instantly. Just type dialog and animate.",
+  "requestFramePermissions": ["display-capture"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
