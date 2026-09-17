@@ -11,12 +11,13 @@ export function buildStickmanPrompt(userTopic: string, options: {
   const dialogueBoxStyle = options.dialogueBoxStyle || 'bubble';
   const isVertical = aspectRatio === '9:16';
 
-  const isMathTopic = /toán|hàm|đồ thị|cực trị|đạo hàm|parabol|math|graph|tích phân|phương trình|giải tích|hình học|vectơ|vector/i.test(userTopic);
+  const isExplicitGraphTopic = /đồ thị|vẽ đồ thị|bảng biến thiên|khảo sát hàm|tiếp tuyến|parabol|curve plot|graph/i.test(userTopic);
+  const isMathTopic = isExplicitGraphTopic || /toán|đại số|hình học|phương trình|tích phân|đạo hàm|cực trị|tam giác|định lý/i.test(userTopic);
 
   // Ground level coordinates & Harmonious object scaling (Vừa phải, cân đối)
-  const groundY = isVertical ? (isMathTopic ? 75 : 72) : 64;
-  const char1X = isVertical ? (isMathTopic ? 18 : 22) : (isMathTopic ? 14 : 20);
-  const char2X = isVertical ? (isMathTopic ? 82 : 78) : (isMathTopic ? 86 : 80);
+  const groundY = isVertical ? (isExplicitGraphTopic ? 75 : 72) : 64;
+  const char1X = isVertical ? (isExplicitGraphTopic ? 18 : 22) : (isExplicitGraphTopic ? 14 : 20);
+  const char2X = isVertical ? (isExplicitGraphTopic ? 82 : 78) : (isExplicitGraphTopic ? 86 : 80);
   const charScale = isVertical ? 1.45 : 1.20;
   const propScale = isVertical ? 1.15 : 1.05;
 
@@ -49,8 +50,21 @@ export function buildStickmanPrompt(userTopic: string, options: {
   }
 
   return `Bạn là Tổng Đạo Diễn & Biên Kịch Hoạt Hình Người Que Đỉnh Cao (StickTalk Director Pro).
-Hãy tạo một kịch bản hoạt hình người que 2D (Stickman Animation) hoàn chỉnh, cử chỉ sống động linh hoạt, chuyển động có chủ đích dứt khoát (KHÔNG TRÔI VÔ THỨC), câu từ cực kỳ tinh gọn sắc sảo và bố cục chuẩn mực cho StickTalk Studio dựa trên chủ đề:
-"${userTopic}"
+Hãy tạo một kịch bản hoạt hình người que 2D (Stickman Animation) làm rõ khái niệm/chủ đề sau theo cấu trúc đối thoại chuẩn mực THẦY VS TRÒ (Socrates Micro-Lesson):
+KHÁI NIỆM CẦN LÀM RÕ: "${userTopic}"
+
+=========================================
+0. MÔ HÌNH NHÂN VẬT MẶC ĐỊNH: THẦY VS TRÒ (MENTOR & LEARNER)
+=========================================
+- NHÂN VẬT 1 (BÊN TRÁI - x=${char1X}): "THẦY" (Thầy giáo / Chuyên gia uyên bác phù hợp với chủ đề: vd Thầy Dev, Thầy AI, Thầy Minh, Chuyên Gia).
+  + Phong thái: Điềm tĩnh, tự tin, uyên bác, giải thích bằng ví dụ và hình ảnh ẩn dụ đời thường.
+  + Trang phục ("appearance"): "outfitStyle": "formal", "hasTie": true, "hasPocketPen": true, "accessory": "glasses", "shirtColor": "#2563eb", "pantsColor": "#1e293b".
+  + Vị trí: Đứng vững ở x=${char1X}, y=${groundY}, "scale": ${charScale}, "flipX": false (nhìn sang phải về phía Trò).
+- NHÂN VẬT 2 (BÊN PHẢI - x=${char2X}): "TRÒ" (Học sinh / Đồ đệ / Bạn Tí - đại diện cho khán giả tò mò).
+  + Phong thái: Năng động, tò mò, hỏi đúng những ngộ nhận/thắc mắc phổ biến nhất của người mới học.
+  + Trang phục ("appearance"): "outfitStyle": "polo", "hasTie": false, "hasBelt": true, "accessory": "cap", "shirtColor": "#fbbf24", "pantsColor": "#2563eb".
+  + Vị trí: Đứng vững ở x=${char2X}, y=${groundY}, "scale": ${charScale}, "flipX": true (nhìn sang trái về phía Thầy).
+- Hai nhân vật luôn nhìn vào nhau tạo thế đối thoại tự nhiên, khoảng cách tối thiểu 50% để sân khấu trung tâm thông thoáng.
 
 =========================================
 1. NGUYÊN TẮC BỐ CỤC KHÔNG GIAN & KÍCH THƯỚC VỪA PHẢI (SAFE-ZONE & BALANCED SCALE)
@@ -84,18 +98,10 @@ Hãy tạo một kịch bản hoạt hình người que 2D (Stickman Animation) 
   + Lúc phóng chiêu / ra đòn: "armL": -120, "armR": -20, "bodyLean": 8, "legL": 25, "legR": -25.
   + Lúc trúng đòn / ngã ngửa (té xỉu): x lùi 4-8%, "rotation": 65-80, "armL": 120, "armR": -60, "bodyLean": -10, "headTilt": -8.
 - Đạo cụ cảm xúc (Props emoji: 💡, ❓, 💻, 📚, ☕, 💢, 💧) xuất hiện đúng nhịp ở giữa sân khấu (x=50, y=52) với hiệu ứng "bounceIn" / "zoomIn".
-- HỖ TRỢ TOÁN HỌC & ĐỒ THỊ KHOA HỌC (QUAN TRỌNG ĐẶC BIỆT):
-  + Lời thoại chứa ký hiệu LaTeX ngắn gọn: "$f(x) = x^3 - 3x$", "$y' = 0$", "$x = \\pm 1$".
-  + NẾU CHỦ ĐỀ TOÁN HỌC (${isMathTopic ? 'BẮT BUỘC' : 'NẾU CÓ'}):
-    * Phải tạo prop "type": "chart" với "chartConfig": { "chartType": "function", "fn": "x^3 - 3*x", "label": "y = x^3 - 3x", "showTangent": true, "showExtrema": true, "showGrid": true, "dynamicTrace": true }
-    * Hoặc prop "type": "table" với "tableConfig": { "tableType": "variation", "title": "Bảng biến thiên 3 tầng" }
-    * Hoặc prop "type": "math" với "mathConfig": { "formula": "y' = 3x^2 - 3 = 0 \\Leftrightarrow x = \\pm 1", "title": "Nghiệm Đạo Hàm" }
-  + BỐ CỤC DUAL-ZONE CHỐNG ĐÈ TUYỆT ĐỐI:
-    * Trong 16:9 (Ngang): 2 nhân vật đứng vững ở 2 CÁNH GÀ (NV1 ở x=14%, NV2 ở x=86%, y=64%). Trung tâm (x=28-72%) dành riêng cho Đồ thị/Bảng (x=50, y=44, scale=1.0).
-    * Trong 9:16 (Dọc Shorts): BỐ CỤC 3 TẦNG:
-      - Tầng Trên (y=26%, scale=0.92): Đồ thị/Bảng biến thiên (x=50).
-      - Tầng Giữa (y=56-65%): Bóng thoại của hai nhân vật.
-      - Tầng Dưới (y=75%): 2 nhân vật (NV1 ở x=18%, NV2 ở x=82%). Tuyệt đối không đè nhau!
+- QUY TẮC ĐẠO CỤ VÀ ĐỒ THỊ (RẤT QUAN TRỌNG):
+${isExplicitGraphTopic ? `  + CHỦ ĐỀ YÊU CẦU ĐỒ THỊ RÕ RÀNG: Phải tạo prop "type": "chart" với "chartConfig": { "chartType": "function", "fn": "x^3 - 3*x", "label": "y = x^3 - 3x", "showTangent": true, "showExtrema": true, "showGrid": true, "dynamicTrace": true } hoặc "type": "table" (Bảng biến thiên 3 tầng).
+  + BỐ CỤC DUAL-ZONE CHỐNG ĐÈ: Trung tâm (x=28-72%) dành riêng cho Đồ thị/Bảng.` : `  + CẢNH BÁO: TUYỆT ĐỐI KHÔNG TỰ Ý TẠO ĐỒ THỊ HÀM SỐ (prop "type": "chart") HAY BẢNG BIẾN THIÊN (prop "type": "table")!
+  + Người dùng KHÔNG yêu cầu đồ thị toán học. Sân khấu trung tâm phải để hoàn toàn thoáng đãng, chỉ điểm xuyết đạo cụ cảm xúc/emoji (💡, 🤖, 💻, 📚...) xuất hiện đúng nhịp rồi mờ dần!`}
 
 =========================================
 3. QUY TẮC CÔ ĐỌNG NGÔN TỪ & ĐỐI THOẠI SOCRATIC (CHỐNG TỪ NGỮ NHIỀU)
@@ -108,15 +114,17 @@ ${toneGuidance}
   + TRIỆT TIÊU 100% CÁC TỪ ĐỆM RƯỜM RÀ: CẤM các từ như "như chúng ta đã biết", "theo lý thuyết sách giáo khoa thì", "thầy xin giải thích rằng", "chúng ta có thể dễ dàng nhận thấy".
   + DÙNG LỐI NÓI THỰC CHIẾN, GÃY GỌN, GIÀU TÍNH HÀNH ĐỘNG: Mỗi câu như một đòn đánh sắc sảo, hỏi thẳng, đáp ngay, chốt gọn!
 
-- CÔNG THỨC 4 HỒI SOCRATIC CHO VIDEO TOÁN HỌC & GIẢNG DẠY:
-  + CÂU 1 (HOOK BẪY 3S ĐẦU - Max 8-10 từ): Thầy tung câu hỏi bẫy hoặc cảnh báo ngộ nhận gây sốc.
-    Ví dụ: "$f'(x_0) = 0$ là đạt cực trị ngay? Sai lầm chết người!"
-  + CÂU 2 (BẮT BẺ HỒN NHIÊN - Max 7-9 từ): Trò thắc mắc theo tư duy ngây thơ kinh điển.
-    Ví dụ: "Ơ kìa Thầy! Tiếp tuyến nằm ngang cơ mà?"
-  + CÂU 3 (PHẢN CHỨNG TRỰC QUAN - Max 8-10 từ): Thầy chỉ vào Đồ thị/Bảng biến thiên đập tan ngộ nhận.
-    Ví dụ: "Nhìn $y = x^3$: Tiếp tuyến ngang nhưng tuyệt đối không đổi dấu!"
-  + CÂU 4 (BÍ KÍP CHỐT HẠ - Max 6-9 từ): Trò hoặc Thầy giác ngộ chân lý đúc kết.
-    Ví dụ: "A! Đạo hàm bắt buộc phải đổi dấu mới là cực trị!"
+- CÔNG THỨC 4 HỒI SOCRATIC LÀM RÕ MỌI KHÁI NIỆM (THẦY & TRÒ):
+  + CÂU 1 (HOOK / ĐẶT VẤN ĐỀ HOẶC NGỘ NHẬN - Trò hỏi, Max 7-10 từ): Trò nêu câu hỏi ngây thơ hoặc ngộ nhận phổ biến nhất về khái niệm "${userTopic}".
+    Ví dụ: "Thầy ơi, AI Chatbot có bộ não thật không mà cái gì cũng biết?"
+    Hoặc: "Ơ kìa Thầy! Tiếp tuyến nằm ngang là đạt cực trị ngay chứ ạ?"
+  + CÂU 2 (ẨN DỤ ĐƠN GIẢN HÓA - Thầy đáp, Max 8-10 từ): Thầy giải thích điểm mấu chốt bằng một phép so sánh đời thường dễ hiểu.
+    Ví dụ: "Không có não đâu em! Nó là cỗ máy đoán từ tiếp theo siêu tốc!"
+    Hoặc: "Sai lầm nhé! Nhìn $y = x^3$: Tiếp tuyến ngang nhưng không đổi dấu!"
+  + CÂU 3 (DẪN CHỨNG TRỰC QUAN - Đạo cụ/Sơ đồ hiện ra, Max 8-10 từ): Xuất hiện đạo cụ minh họa ở giữa sân khấu (Dual-Zone), Thầy giơ tay chỉ vào dẫn chứng.
+    Ví dụ: "Giống bàn phím đoán từ, nhưng AI đọc cả triệu cuốn sách!"
+  + CÂU 4 (BÍ KÍP CHỐT HẠ & GIÁC NGỘ - Max 6-9 từ): Trò giác ngộ nguyên lý, Thầy chốt câu khẩu quyết đúc kết.
+    Ví dụ: "Biết nguyên lý rồi thì không sợ bị AI lừa nữa nhé!"
   + NHỊP ĐỐI THOẠI: Phải có từ ${minLines} đến ${maxLines} câu thoại tung hứng đối đáp (mỗi câu từ 6 - 10 từ, thời lượng 2.2s - 3.2s).
   + KIỂU HỘP THOẠI ("boxStyle"): Đặt mặc định "${dialogueBoxStyle}" (hoặc "card", "cinema", "bubble", "manga").
 
@@ -222,7 +230,7 @@ Schema mẫu chuẩn xác:
       ]
     }
   ],
-  "props": ${isMathTopic ? `[
+  "props": ${isExplicitGraphTopic ? `[
     {
       "id": "prop-graph",
       "type": "chart",

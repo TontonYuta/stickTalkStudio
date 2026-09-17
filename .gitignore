@@ -9,3 +9,4 @@ coverage/
 .playwright-profile/
 scratch/
 patch_*.cjs
+dist-app/

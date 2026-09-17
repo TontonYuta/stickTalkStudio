@@ -1,12 +1,41 @@
-import test from 'node:test';
+import test, { before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const execFileAsync = promisify(execFile);
-const BASE_URL = 'http://localhost:3050';
+const BASE_URL = 'http://127.0.0.1:3050';
+let serverProcess = null;
+
+before(async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/health`, { signal: AbortSignal.timeout(1000) });
+    if (res.ok) return;
+  } catch {}
+
+  serverProcess = spawn('node', ['dist/server.cjs'], {
+    cwd: process.cwd(),
+    env: { ...process.env, NODE_ENV: 'production', PORT: '3050' },
+    stdio: 'ignore'
+  });
+
+  const start = Date.now();
+  while (Date.now() - start < 15000) {
+    try {
+      const res = await fetch(`${BASE_URL}/api/health`, { signal: AbortSignal.timeout(500) });
+      if (res.ok) break;
+    } catch {}
+    await new Promise(r => setTimeout(r, 200));
+  }
+});
+
+after(() => {
+  if (serverProcess) {
+    serverProcess.kill('SIGTERM');
+  }
+});
 
 test('1. Health Check Endpoint', async () => {
   const res = await fetch(`${BASE_URL}/api/health`);
@@ -235,3 +264,171 @@ test('3. Video Export via Playwright & Trimming Verification', { timeout: 45000 
   const frameStat = fs.statSync(framePath);
   assert.ok(frameStat.size > 5000, 'Frame image must contain actual graphical data');
 });
+
+test('4. Generate New Video with Custom Duration Verification', async () => {
+  const targetDuration = 25;
+  const res = await fetch(`${BASE_URL}/api/ai/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      provider: 'fast',
+      topic: 'Giải phương trình bậc 2 bằng biệt thức Delta',
+      duration: targetDuration,
+      aspectRatio: '16:9',
+      dialogueStyle: 'pedagogical',
+      dialogueBoxStyle: 'bubble'
+    })
+  });
+
+  assert.equal(res.status, 200);
+  const data = await res.json();
+  assert.equal(data.success, true);
+  assert.ok(data.project);
+  assert.equal(data.project.duration, targetDuration, `Project duration must equal requested custom duration (${targetDuration}s)`);
+  assert.ok(data.project.characters.length >= 2, 'Generated project should have at least 2 characters');
+  
+  // Verify characters remain visible for the full custom duration
+  data.project.characters.forEach(c => {
+    assert.ok(c.duration >= targetDuration, `Character ${c.id} duration (${c.duration}s) must cover project duration (${targetDuration}s)`);
+  });
+
+  // Verify dialog blocks fit within the custom duration
+  data.project.dialogBlocks.forEach(db => {
+    assert.ok(db.startTime < targetDuration, `Dialog block ${db.id} must start within project duration`);
+  });
+});
+
+test('5. Concept Clarification (Thầy vs Trò Archetype) Verification', async () => {
+  const res = await fetch(`${BASE_URL}/api/ai/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      provider: 'fast',
+      topic: 'Cách AI chatbot hoạt động',
+      duration: 15,
+      aspectRatio: '16:9',
+      dialogueStyle: 'pedagogical',
+      dialogueBoxStyle: 'bubble'
+    })
+  });
+
+  assert.equal(res.status, 200);
+  const data = await res.json();
+  assert.equal(data.success, true);
+  assert.ok(data.project);
+  assert.ok(data.project.characters.length >= 2, 'Must have at least Thầy and Trò');
+  
+  // Verify Mentor character
+  const teacher = data.project.characters.find(c => c.id.includes('teacher') || (c.name && c.name.includes('Thầy')));
+  assert.ok(teacher, 'Must contain a Teacher / Mentor character');
+  assert.equal(teacher.flipX, false, 'Teacher must face right towards student');
+  
+  // Verify Student character
+  const student = data.project.characters.find(c => c.id.includes('student') || (c.name && (c.name.includes('Trò') || c.name.includes('Tí'))));
+  assert.ok(student, 'Must contain a Student / Learner character');
+  assert.equal(student.flipX, true, 'Student must face left towards teacher');
+
+  // Verify dialogue blocks exist and convey concept
+  assert.ok(data.project.dialogBlocks.length >= 3, 'Must contain Socratic dialogue blocks');
+  const hasAITopic = data.project.dialogBlocks.some(db => db.text.toLowerCase().includes('ai') || db.text.toLowerCase().includes('chatbot') || db.text.toLowerCase().includes('từ'));
+  assert.ok(hasAITopic, 'Dialogue must address the core concept');
+});
+
+test('6. Non-Graph Topic Has No Unsolicited Function Graph', async () => {
+  const res = await fetch(`${BASE_URL}/api/ai/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      provider: 'fast',
+      topic: 'Cách AI chatbot hoạt động',
+      duration: 15,
+      aspectRatio: '16:9',
+      dialogueStyle: 'pedagogical',
+      dialogueBoxStyle: 'bubble'
+    })
+  });
+
+  assert.equal(res.status, 200);
+  const data = await res.json();
+  assert.equal(data.success, true);
+  
+  // Verify props do NOT contain any function chart
+  const chartProps = (data.project.props || []).filter(p => p.type === 'chart');
+  assert.equal(chartProps.length, 0, 'Non-graph topics like AI chatbot must NEVER contain unsolicited chart props');
+});
+
+test('7. Smart Video Export with BGM Audio Muxing', async () => {
+  const exportProject = {
+    id: 'test-bgm-export-project',
+    title: 'BGM Muxing Test',
+    aspectRatio: '16:9',
+    duration: 3,
+    background: 'bg-slate-900',
+    characters: [
+      {
+        id: 'char-1',
+        name: 'Thầy Giáo',
+        type: 'teacher',
+        x: 25,
+        y: 65,
+        scale: 1,
+        color: '#3b82f6',
+        expression: 'speaking',
+        flipX: false,
+        startTime: 0,
+        duration: 3
+      }
+    ],
+    dialogBlocks: [
+      {
+        id: 'dialog-1',
+        characterId: 'char-1',
+        text: 'Thử nghiệm ghép nhạc nền Lo-fi!',
+        startTime: 0.5,
+        duration: 2.0,
+        boxStyle: 'bubble'
+      }
+    ],
+    props: [],
+    audios: []
+  };
+
+  const res = await fetch(`${BASE_URL}/api/export-video`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      project: exportProject,
+      resolution: '720p',
+      fps: 30,
+      bgmTrack: 'lofi',
+      bgmVolume: 0.35
+    })
+  });
+
+  assert.equal(res.status, 200);
+  const data = await res.json();
+  assert.equal(data.success, true);
+  assert.ok(data.filePath, 'Export must return a filePath');
+  assert.ok(fs.existsSync(data.filePath), `Exported file must exist at ${data.filePath}`);
+
+  // Probe audio stream using ffprobe
+  const ffprobeBin = fs.existsSync('/home/tontonyuta/.local/bin/ffprobe')
+    ? '/home/tontonyuta/.local/bin/ffprobe'
+    : 'ffprobe';
+
+  const { stdout: probeOut } = await execFileAsync(ffprobeBin, [
+    '-v', 'error',
+    '-select_streams', 'a:0',
+    '-show_entries', 'stream=codec_name,channels,sample_rate',
+    '-of', 'json',
+    data.filePath
+  ]);
+
+  const probe = JSON.parse(probeOut);
+  assert.ok(probe.streams && probe.streams.length > 0, 'Exported video must contain an audio stream');
+  const audioStream = probe.streams[0];
+  assert.equal(audioStream.codec_name, 'aac', 'Audio codec must be AAC');
+  assert.equal(audioStream.channels, 2, 'Audio must be stereo (2 channels)');
+});
+
+

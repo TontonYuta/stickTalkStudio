@@ -14,7 +14,9 @@ import {
   Zap, 
   Layers, 
   MonitorPlay,
-  FileVideo
+  FileVideo,
+  Music,
+  Volume2
 } from 'lucide-react';
 import { useEditorStore } from '../store';
 import { useExportVideo } from '../hooks/useExportVideo';
@@ -32,6 +34,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onOpe
   const [activeTab, setActiveTab] = useState<'smart' | 'browser'>('smart');
   const [resolution, setResolution] = useState<'1080p' | '720p'>('1080p');
   const [fps, setFps] = useState<60 | 30>(60);
+  const [bgmTrack, setBgmTrack] = useState<'lofi' | 'pedagogy' | 'upbeat' | 'dramatic' | 'none'>('lofi');
+  const [bgmVolume, setBgmVolume] = useState<number>(0.35);
   
   // Job status
   const [status, setStatus] = useState<'idle' | 'exporting' | 'success' | 'error'>('idle');
@@ -66,7 +70,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onOpe
         body: JSON.stringify({
           project,
           resolution,
-          fps
+          fps,
+          bgmTrack,
+          bgmVolume
         })
       });
 
@@ -291,6 +297,123 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onOpe
                     {fps === 30 && <Check size={14} className="text-blue-600" />}
                   </button>
                 </div>
+              </div>
+
+              {/* Background Music (BGM) */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                    <Music size={14} className="text-blue-600" />
+                    <span>Nhạc nền video (BGM):</span>
+                  </label>
+                  {bgmTrack !== 'none' && (
+                    <span className="text-[11px] font-mono text-blue-600 font-semibold">
+                      Âm lượng: {Math.round(bgmVolume * 100)}%
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setBgmTrack('lofi')}
+                    className={`p-2.5 rounded-lg border text-left transition-all ${
+                      bgmTrack === 'lofi'
+                        ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-500/20 shadow-xs'
+                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-bold text-xs text-gray-900 flex items-center justify-between">
+                      <span>Lo-Fi Chill</span>
+                      {bgmTrack === 'lofi' && <Check size={13} className="text-blue-600" />}
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-0.5">Thư thái, ấm áp (Gợi ý)</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBgmTrack('pedagogy')}
+                    className={`p-2.5 rounded-lg border text-left transition-all ${
+                      bgmTrack === 'pedagogy'
+                        ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-500/20 shadow-xs'
+                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-bold text-xs text-gray-900 flex items-center justify-between">
+                      <span>Sư phạm</span>
+                      {bgmTrack === 'pedagogy' && <Check size={13} className="text-blue-600" />}
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-0.5">Giảng dạy, truyền cảm</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBgmTrack('upbeat')}
+                    className={`p-2.5 rounded-lg border text-left transition-all ${
+                      bgmTrack === 'upbeat'
+                        ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-500/20 shadow-xs'
+                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-bold text-xs text-gray-900 flex items-center justify-between">
+                      <span>Vui tươi</span>
+                      {bgmTrack === 'upbeat' && <Check size={13} className="text-blue-600" />}
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-0.5">Năng động, cuốn hút</p>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBgmTrack('dramatic')}
+                    className={`p-2.5 rounded-lg border text-left transition-all ${
+                      bgmTrack === 'dramatic'
+                        ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-500/20 shadow-xs'
+                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-bold text-xs text-gray-900 flex items-center justify-between">
+                      <span>Kịch tính</span>
+                      {bgmTrack === 'dramatic' && <Check size={13} className="text-blue-600" />}
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-0.5">Tạo bất ngờ, kịch tích</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBgmTrack('none')}
+                    className={`p-2.5 rounded-lg border text-left transition-all ${
+                      bgmTrack === 'none'
+                        ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-500/20 shadow-xs'
+                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-bold text-xs text-gray-900 flex items-center justify-between">
+                      <span>Không nhạc nền</span>
+                      {bgmTrack === 'none' && <Check size={13} className="text-blue-600" />}
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-0.5">Chỉ giọng đọc / yên lặng</p>
+                  </button>
+                </div>
+
+                {bgmTrack !== 'none' && (
+                  <div className="mt-2.5 p-2.5 bg-gray-50 border border-gray-200 rounded-lg flex items-center gap-3">
+                    <Volume2 size={15} className="text-gray-500 shrink-0" />
+                    <input
+                      type="range"
+                      min="0.05"
+                      max="1.0"
+                      step="0.05"
+                      value={bgmVolume}
+                      onChange={(e) => setBgmVolume(parseFloat(e.target.value))}
+                      className="w-full accent-blue-600 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <span className="text-xs font-mono font-bold text-gray-700 w-10 text-right">
+                      {Math.round(bgmVolume * 100)}%
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Automation highlights */}

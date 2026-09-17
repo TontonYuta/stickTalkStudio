@@ -11,6 +11,9 @@ export interface ExportVideoOptions {
   port: number;
   resolution?: '1080p' | '720p';
   fps?: number;
+  bgmTrack?: 'none' | 'lofi' | 'pedagogy' | 'upbeat' | 'dramatic' | 'custom';
+  bgmVolume?: number;
+  customAudioPath?: string;
   onProgress?: (progress: number, statusText: string) => void;
 }
 
@@ -22,8 +25,26 @@ export interface ExportVideoResult {
   error?: string;
 }
 
+export function resolveBgmAudioPath(track: string): string | null {
+  if (!track || track === 'none') return null;
+  const fileName = `bgm-${track}.mp3`;
+  const candidates = [
+    path.resolve(process.cwd(), 'public', 'audio', fileName),
+    path.resolve(__dirname, '..', 'public', 'audio', fileName),
+    path.resolve(__dirname, 'public', 'audio', fileName),
+    ...(process.resourcesPath ? [
+      path.join(process.resourcesPath, 'app', 'public', 'audio', fileName),
+      path.join(process.resourcesPath, 'public', 'audio', fileName)
+    ] : [])
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return null;
+}
+
 export async function exportVideoViaPlaywright(options: ExportVideoOptions): Promise<ExportVideoResult> {
-  const { port, onProgress, resolution = '1080p', fps = 60 } = options;
+  const { port, onProgress, resolution = '1080p', fps = 60, bgmTrack = 'lofi', bgmVolume = 0.35, customAudioPath } = options;
   const project = normalizeProjectScales(options.project, options.project.aspectRatio);
   const duration = project.duration || 15;
   const tempDir = path.join(os.tmpdir(), `sticktalk-export-${Date.now()}`);
@@ -164,30 +185,52 @@ export async function exportVideoViaPlaywright(options: ExportVideoOptions): Pro
 
     const safeStartOffset = Math.max(0, Number(playbackOffsetSec) || 0).toFixed(2);
 
+    // Audio / BGM merging configuration
+    let audioArgs: string[] = [];
+    const resolvedAudio = customAudioPath && fs.existsSync(customAudioPath) 
+      ? customAudioPath 
+      : resolveBgmAudioPath(bgmTrack);
+
+    if (resolvedAudio) {
+      onProgress?.(87, 'Đang hòa trộn nhạc nền (BGM Audio Merging)...');
+      const vol = typeof bgmVolume === 'number' ? Math.max(0.05, Math.min(1.0, bgmVolume)) : 0.35;
+      const fadeOutStart = Math.max(1, duration - 1.5);
+
+      audioArgs = [
+        '-stream_loop', '-1',
+        '-i', resolvedAudio,
+        '-filter_complex', `[1:a]volume=${vol.toFixed(2)},afade=t=in:st=0:d=0.5,afade=t=out:st=${fadeOutStart.toFixed(1)}:d=1.5[a]`,
+        '-map', '0:v',
+        '-map', '[a]',
+        '-c:a', 'aac',
+        '-b:a', '192k',
+        '-shortest'
+      ];
+    }
+
     await new Promise<void>((resolve, reject) => {
-      execFile(
-        ffmpegBin,
-        [
-          '-y',
-          '-ss', safeStartOffset, // Skip initial loading/setup phase
-          '-i', webmPath,
-          '-t', `${duration}`,
-          '-r', `${fps}`,
-          '-c:v', 'libx264',
-          '-pix_fmt', 'yuv420p',
-          '-preset', 'fast',
-          '-movflags', '+faststart',
-          targetMp4Path
-        ],
-        (err) => {
-          if (err) return reject(err);
-          resolve();
-        }
-      );
+      const ffmpegArgs = [
+        '-y',
+        '-ss', safeStartOffset, // Skip initial loading/setup phase
+        '-i', webmPath,
+        ...audioArgs,
+        '-t', `${duration}`,
+        '-r', `${fps}`,
+        '-c:v', 'libx264',
+        '-pix_fmt', 'yuv420p',
+        '-preset', 'fast',
+        '-movflags', '+faststart',
+        targetMp4Path
+      ];
+
+      execFile(ffmpegBin, ffmpegArgs, (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
     });
 
     // Also copy to public export directory for web download
-    const publicExportsDir = path.resolve(process.cwd(), 'dist', 'exports');
+    const publicExportsDir = path.join(os.homedir(), 'Videos', 'StickTalk', 'exports');
     fs.mkdirSync(publicExportsDir, { recursive: true });
     const publicMp4Path = path.join(publicExportsDir, mp4FileName);
     fs.copyFileSync(targetMp4Path, publicMp4Path);

@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 import { generateStickmanVideoScript, GenerationOptions, refineStickmanVideoScript, RerenderOptions } from './server/playwrightEngine';
@@ -9,16 +10,31 @@ import { exportVideoViaPlaywright } from './server/videoExporter';
 dotenv.config();
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '3050', 10);
+let currentPort = parseInt(process.env.PORT || '3050', 10);
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Static exports directory
-const exportsDir = path.resolve(process.cwd(), 'dist', 'exports');
-if (!fs.existsSync(exportsDir)) {
-  fs.mkdirSync(exportsDir, { recursive: true });
+export function getDistPath(): string {
+  const candidate1 = path.resolve(__dirname, 'index.html');
+  if (fs.existsSync(candidate1)) return __dirname;
+  const candidate2 = path.resolve(__dirname, 'dist', 'index.html');
+  if (fs.existsSync(candidate2)) return path.resolve(__dirname, 'dist');
+  const candidate3 = path.resolve(process.cwd(), 'dist', 'index.html');
+  if (fs.existsSync(candidate3)) return path.resolve(process.cwd(), 'dist');
+  return path.resolve(process.cwd(), 'dist');
 }
+
+export function getExportsDir(): string {
+  const custom = path.join(os.homedir(), 'Videos', 'StickTalk', 'exports');
+  if (!fs.existsSync(custom)) {
+    fs.mkdirSync(custom, { recursive: true });
+  }
+  return custom;
+}
+
+// Static exports directory
+const exportsDir = getExportsDir();
 app.use('/exports', express.static(exportsDir));
 
 // API Health Check
@@ -31,7 +47,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
     status: 'ok',
     app: 'StickTalk Studio',
     version: '2.0.0',
-    port: PORT,
+    port: currentPort,
     engines: {
       antigravity: agyExists,
       playwrightChrome: chromeExists,
@@ -165,7 +181,7 @@ setInterval(() => {
 
 // POST /api/export-video/start - Start async video export job (Supports unlimited duration)
 app.post('/api/export-video/start', async (req: Request, res: Response) => {
-  const { project, resolution = '1080p', fps = 60 } = req.body;
+  const { project, resolution = '1080p', fps = 60, bgmTrack = 'lofi', bgmVolume = 0.35, customAudioPath } = req.body;
   if (!project || !Array.isArray(project.characters)) {
     return res.status(400).json({ error: 'Dữ liệu dự án không hợp lệ.' });
   }
@@ -183,9 +199,12 @@ app.post('/api/export-video/start', async (req: Request, res: Response) => {
   // Run in background without request timeout limit
   exportVideoViaPlaywright({
     project,
-    port: PORT,
+    port: currentPort,
     resolution,
     fps: Number(fps) || 60,
+    bgmTrack,
+    bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.35,
+    customAudioPath,
     onProgress: (progress, statusText) => {
       const cur = exportJobs.get(jobId);
       if (cur) {
@@ -212,25 +231,30 @@ app.post('/api/export-video/start', async (req: Request, res: Response) => {
     const cur = exportJobs.get(jobId);
     if (cur) {
       cur.status = 'failed';
-      cur.error = err.message || 'Lỗi máy chủ khi ghi hình video.';
+      cur.error = err.message || 'Lỗi hệ thống khi xuất video.';
     }
   });
 
-  res.json({ success: true, jobId });
+  res.json({
+    success: true,
+    jobId,
+    message: 'Tác vụ xuất video đã được khởi động ở chế độ nền.'
+  });
 });
 
-// GET /api/export-video/status/:jobId - Poll export job progress
+// GET /api/export-video/status/:jobId - Query progress of export job
 app.get('/api/export-video/status/:jobId', (req: Request, res: Response) => {
-  const job = exportJobs.get(req.params.jobId);
+  const { jobId } = req.params;
+  const job = exportJobs.get(jobId);
   if (!job) {
-    return res.status(404).json({ error: 'Không tìm thấy tác vụ xuất video.' });
+    return res.status(404).json({ error: 'Không tìm thấy tác vụ xuất video này.' });
   }
-  res.json({ success: true, job });
+  res.json(job);
 });
 
 // POST /api/export-video - Legacy Synchronous Playwright Video Exporter
 app.post('/api/export-video', async (req: Request, res: Response) => {
-  const { project, resolution = '1080p', fps = 60 } = req.body;
+  const { project, resolution = '1080p', fps = 60, bgmTrack = 'none', bgmVolume = 0.35, customAudioPath } = req.body;
   if (!project || !Array.isArray(project.characters)) {
     return res.status(400).json({ error: 'Dữ liệu dự án không hợp lệ.' });
   }
@@ -238,9 +262,12 @@ app.post('/api/export-video', async (req: Request, res: Response) => {
   try {
     const result = await exportVideoViaPlaywright({
       project,
-      port: PORT,
+      port: currentPort,
       resolution,
       fps: Number(fps) || 60,
+      bgmTrack,
+      bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.35,
+      customAudioPath,
       onProgress: (progress, statusText) => {
         console.log(`[Playwright Video Export] [${progress}%] ${statusText}`);
       }
@@ -256,8 +283,11 @@ app.post('/api/export-video', async (req: Request, res: Response) => {
   }
 });
 
-// Start Server with Vite
-async function startServer() {
+// Start Server with Vite or Static
+export async function startServer(customPort?: number): Promise<{ server: any; port: number }> {
+  if (customPort !== undefined && customPort >= 0) {
+    currentPort = customPort;
+  }
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: {
@@ -268,17 +298,28 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.resolve(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    const dPath = getDistPath();
+    app.use(express.static(dPath));
     app.get('*', (_req: Request, res: Response) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.sendFile(path.join(dPath, 'index.html'));
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[StickTalk Studio] Máy chủ hoạt động tại http://0.0.0.0:${PORT}`);
-    console.log(`[StickTalk Studio] Antigravity & Playwright Engine sẵn sàng!`);
+  return new Promise((resolve) => {
+    const serverInstance = app.listen(currentPort, '127.0.0.1', () => {
+      const addr = serverInstance.address();
+      if (addr && typeof addr === 'object') {
+        currentPort = addr.port;
+      }
+      console.log(`[StickTalk Studio] Máy chủ hoạt động tại http://127.0.0.1:${currentPort}`);
+      console.log(`[StickTalk Studio] Antigravity & Playwright Engine sẵn sàng!`);
+      resolve({ server: serverInstance, port: currentPort });
+    });
   });
 }
 
-startServer();
+export { app };
+
+if (!process.versions.electron && process.env.EMBEDDED_DESKTOP !== 'true') {
+  startServer();
+}

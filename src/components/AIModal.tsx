@@ -44,10 +44,12 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, onStartExport
   if (!isOpen) return null;
 
   const quickPrompts = [
-    { title: '🎓 Định luật Newton', prompt: 'Thầy giáo giải thích định luật 3 Newton cho học sinh bằng tình huống người que bị bật lùi khi nhảy' },
-    { title: '💻 Bug đêm Release', prompt: 'Cuộc tranh luận hài hước giữa lập trình viên và sếp PM khi push code lên production bị sập server' },
-    { title: '⚔️ Võ thuật Chưởng pháp', prompt: 'Trận chiến đối kháng đỉnh cao giữa 2 người que xanh và đỏ, tung chiêu thức sét và chưởng nổ BÙM' },
-    { title: '☕ Cà phê Sáng Sớm', prompt: 'Nhân viên văn phòng mắt nhắm mắt mở đòi uống cà phê đậm đặc để tỉnh táo chiến deadline' },
+    { title: '🤖 Cách AI chatbot hoạt động', prompt: 'Cách AI chatbot hoạt động' },
+    { title: '✈️ Tại sao máy bay bay được', prompt: 'Tại sao máy bay bay được' },
+    { title: '💰 Lãi kép là gì', prompt: 'Bản chất sức mạnh của lãi kép' },
+    { title: '📐 Đạo hàm là gì', prompt: 'Đạo hàm là gì và ý nghĩa tiếp tuyến đổi màu' },
+    { title: '🍎 Định luật 3 Newton', prompt: 'Định luật 3 Newton và phản lực' },
+    { title: '🎲 Nghịch lý Monty Hall', prompt: 'Nghịch lý chọn cửa Monty Hall' },
   ];
 
   const quickRefineTags = [
@@ -316,14 +318,15 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, onStartExport
             <div className="space-y-4">
               {/* Topic input */}
               <div>
-                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-1.5">
-                  Chủ đề hoặc tình huống cần làm phim
+                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-1.5 flex items-center justify-between">
+                  <span>Nội dung / Khái niệm cần làm rõ</span>
+                  <span className="text-[11px] font-semibold text-indigo-600 lowercase bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">mặc định: thầy vs trò</span>
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  placeholder="VD: Thầy giáo giải thích định luật bảo toàn năng lượng, hai võ sĩ người que đấu võ..."
+                  placeholder="VD: Cách AI chatbot hoạt động, Tại sao máy bay bay được, Đạo hàm là gì, Lãi kép hoạt động thế nào..."
                   className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50/40"
                 />
                 

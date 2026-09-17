@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# StickTalk Studio - Native Desktop App Launcher
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PACKAGED_BIN="$SCRIPT_DIR/dist-app/StickTalk-Studio-linux-x64/StickTalk-Studio"
+
+if [ -x "$PACKAGED_BIN" ]; then
+  exec "$PACKAGED_BIN" --no-sandbox "$@"
+else
+  cd "$SCRIPT_DIR"
+  exec "$SCRIPT_DIR/node_modules/.bin/electron" . --no-sandbox "$@"
+fi

@@ -1,0 +1,247 @@
+import { ProjectState } from '../types';
+
+export const capstone15WeeksTemplate: ProjectState = {
+  title: "Hướng Dẫn Đồ Án 15 Tuần: Enterprise Agent & Advanced RAG",
+  aspectRatio: "16:9",
+  background: "bg-slate-900",
+  duration: 60,
+  dialogueStyle: "pedagogical",
+  dialogueBoxStyle: "card",
+  filters: {
+    brightness: 100,
+    contrast: 105,
+    grayscale: 0,
+    sepia: 0,
+    blur: 0
+  },
+  characters: [
+    {
+      id: "char-mentor",
+      name: "Thầy Mentor TS",
+      showName: true,
+      type: "teacher",
+      x: 16,
+      y: 64,
+      scale: 1.22,
+      flipX: false,
+      color: "#38bdf8",
+      appearance: {
+        skinColor: "#ffedd5",
+        hairColor: "#0f172a",
+        hairStyle: "short",
+        shirtColor: "#1e3a8a",
+        pantsColor: "#0f172a",
+        accessory: "glasses",
+        outfitStyle: "formal",
+        hasTie: true,
+        tieColor: "#ef4444",
+        hasBelt: true,
+        beltColor: "#1e293b",
+        hasPocketPen: true,
+        shoeColor: "#020617"
+      },
+      pose: { armL: -105, armR: 25, legL: 10, legR: -10, bodyLean: 3, headTilt: 0 },
+      startTime: 0,
+      duration: 60,
+      animation: { in: "slideInLeft", inDuration: 0.8 },
+      keyframes: [
+        { id: "km-1", time: 0, x: 16, y: 64, pose: { armL: 20, armR: -30, legL: 10, legR: -10, bodyLean: 1, headTilt: 0 } },
+        { id: "km-2", time: 8, x: 16, y: 64, pose: { armL: -110, armR: 30, legL: 10, legR: -10, bodyLean: 4, headTilt: 1 } },
+        { id: "km-3", time: 22, x: 16, y: 64, pose: { armL: -120, armR: -15, legL: 10, legR: -10, bodyLean: 2, headTilt: -2 } },
+        { id: "km-4", time: 38, x: 16, y: 64, pose: { armL: -130, armR: 20, legL: 10, legR: -10, bodyLean: 5, headTilt: 2 } },
+        { id: "km-5", time: 50, x: 16, y: 64, pose: { armL: -90, armR: -90, legL: 5, legR: -5, bodyLean: 1, headTilt: 0 } }
+      ]
+    },
+    {
+      id: "char-student",
+      name: "Kỹ Sư 2K3",
+      showName: true,
+      type: "student",
+      x: 84,
+      y: 64,
+      scale: 1.22,
+      flipX: true,
+      color: "#f59e0b",
+      appearance: {
+        skinColor: "#ffffff",
+        hairColor: "#1e293b",
+        hairStyle: "short",
+        shirtColor: "#f59e0b",
+        pantsColor: "#1e293b",
+        accessory: "hat",
+        outfitStyle: "casual",
+        hasTie: false,
+        hasBelt: true,
+        beltColor: "#334155",
+        hasPocketPen: false,
+        shoeColor: "#0f172a"
+      },
+      pose: { armL: -25, armR: 35, legL: -10, legR: 10, bodyLean: -2, headTilt: 0 },
+      startTime: 0,
+      duration: 60,
+      animation: { in: "slideInRight", inDuration: 0.8 },
+      keyframes: [
+        { id: "ks-1", time: 0, x: 84, y: 64, pose: { armL: -25, armR: 35, legL: -10, legR: 10, bodyLean: -2, headTilt: 0 } },
+        { id: "ks-2", time: 14, x: 84, y: 64, pose: { armL: -40, armR: 50, legL: -10, legR: 10, bodyLean: 3, headTilt: 4 } },
+        { id: "ks-3", time: 30, x: 84, y: 64, pose: { armL: -110, armR: 30, legL: 0, legR: 0, bodyLean: -4, headTilt: -2 } },
+        { id: "ks-4", time: 44, x: 84, y: 64, pose: { armL: -130, armR: 130, legL: 10, legR: -10, bodyLean: 2, headTilt: 0 } }
+      ]
+    }
+  ],
+  props: [
+    {
+      id: "prop-title-card",
+      type: "math",
+      content: "Enterprise LLM Agent (15 Tuần)",
+      x: 50,
+      y: 28,
+      scale: 1.05,
+      rotation: 0,
+      startTime: 0.5,
+      duration: 9.5,
+      animation: { in: "fadeIn", out: "fadeOut" },
+      mathConfig: {
+        title: "ĐỒ ÁN TỐT NGHIỆP KỸ SƯ CNTT",
+        formula: "\\text{Kiến trúc Agent 2 Tầng: } \\mathcal{A} = \\langle \\text{Advanced RAG}, \\text{LangGraph Tool Engine} \\rangle",
+        cardStyle: "glass",
+        displayMode: true
+      }
+    },
+    {
+      id: "prop-stage-table",
+      type: "table",
+      content: "Lộ Trình 4 Mốc 15 Tuần",
+      x: 50,
+      y: 42,
+      scale: 0.98,
+      rotation: 0,
+      startTime: 10.5,
+      duration: 48.5,
+      animation: { in: "zoomIn", out: "fadeOut" },
+      tableConfig: {
+        tableType: "data",
+        title: "LỘ TRÌNH 15 TUẦN THEO 4 MỐC NGHIỆM THU",
+        headers: ["Chặng", "Tuần", "Mục tiêu trọng tâm", "Minh chứng / Deliverables"],
+        rows: [
+          ["Mốc 1", "T1 - T4", "Xác định Scope, Nghiên cứu lý thuyết & Benchmark", "Tài liệu C4 Model & 150 test cases chuẩn"],
+          ["Mốc 2", "T5 - T8", "Hạ tầng Docker, Advanced RAG & Tool Execution", "Pipeline Hybrid Search + Qdrant, Tool Registry"],
+          ["Mốc 3", "T9 - T11", "Multi-step LangGraph, End-to-End & Ablation Study", "Chatbot streaming, Báo cáo kiểm thử định lượng"],
+          ["Mốc 4", "T12 - T15", "Bảo mật, Đóng gói Docker Compose & Bảo vệ Hội đồng", "Quyển báo cáo 60 trang, Slide & Demo thực chiến"]
+        ]
+      }
+    }
+  ],
+  dialogBlocks: [
+    {
+      id: "db-1",
+      characterId: "char-mentor",
+      text: "Chào em! Hôm nay thầy sẽ hướng dẫn chi tiết lộ trình 15 tuần làm đồ án tốt nghiệp Xây dựng Enterprise Agent!",
+      startTime: 0.8,
+      duration: 4.5,
+      emotion: "explaining",
+      bubbleType: "normal",
+      boxStyle: "card",
+      roleIcon: "👨‍🏫"
+    },
+    {
+      id: "db-2",
+      characterId: "char-student",
+      text: "Dạ thưa thầy, đề tài này giải quyết 2 điểm nghẽn lớn nhất của LLM trong doanh nghiệp đúng không ạ?",
+      startTime: 5.6,
+      duration: 4.2,
+      emotion: "questioning",
+      bubbleType: "normal",
+      boxStyle: "card",
+      roleIcon: "🎓"
+    },
+    {
+      id: "db-3",
+      characterId: "char-mentor",
+      text: "Chính xác! Điểm nghẽn 1 là Ảo giác (Hallucination), và điểm nghẽn 2 là Thiếu năng lực tương tác công cụ ngoại vi!",
+      startTime: 10.2,
+      duration: 4.8,
+      emotion: "explaining",
+      bubbleType: "normal",
+      boxStyle: "card",
+      roleIcon: "👨‍🏫"
+    },
+    {
+      id: "db-4",
+      characterId: "char-mentor",
+      text: "Ở Chặng 1 (Tuần 1 đến 4), em phải thiết kế kiến trúc 2 tầng và xây dựng bộ benchmark 150 test cases chuẩn khoa học.",
+      startTime: 15.5,
+      duration: 5.2,
+      emotion: "explaining",
+      bubbleType: "normal",
+      boxStyle: "card",
+      roleIcon: "🎯"
+    },
+    {
+      id: "db-5",
+      characterId: "char-student",
+      text: "Sang Chặng 2 (Tuần 5 đến 8), em sẽ triển khai Hybrid Search BM25, Qdrant và Tool Registry bằng Pydantic v2 đúng không ạ?",
+      startTime: 21.2,
+      duration: 5.5,
+      emotion: "happy",
+      bubbleType: "normal",
+      boxStyle: "card",
+      roleIcon: "💻"
+    },
+    {
+      id: "db-6",
+      characterId: "char-mentor",
+      text: "Rất chuẩn! Đến Chặng 3 (Tuần 9 đến 11), ta ghép State Machine LangGraph, hỗ trợ Human-in-the-loop và chạy Ablation Study.",
+      startTime: 27.2,
+      duration: 5.5,
+      emotion: "explaining",
+      bubbleType: "normal",
+      boxStyle: "card",
+      roleIcon: "⚙️"
+    },
+    {
+      id: "db-7",
+      characterId: "char-student",
+      text: "Vậy còn 4 tuần cuối (Tuần 12 đến 15) ta sẽ làm gì để đạt điểm A+ tuyệt đối trước Hội đồng đánh giá thưa thầy?",
+      startTime: 33.2,
+      duration: 5.0,
+      emotion: "questioning",
+      bubbleType: "normal",
+      boxStyle: "card",
+      roleIcon: "🏆"
+    },
+    {
+      id: "db-8",
+      characterId: "char-mentor",
+      text: "Tuần 12 kiểm thử bảo mật Prompt Injection; Tuần 13-14 hoàn thiện báo cáo 60 trang; Tuần 15 tổng duyệt demo tự tin bảo vệ!",
+      startTime: 38.6,
+      duration: 5.8,
+      emotion: "explaining",
+      bubbleType: "normal",
+      boxStyle: "card",
+      roleIcon: "🛡️"
+    },
+    {
+      id: "db-9",
+      characterId: "char-student",
+      text: "Tuyệt vời quá thầy ơi! Kế hoạch 4 mốc rõ ràng thế này em tự tin sẽ làm chủ đồ án từ A đến Z!",
+      startTime: 44.8,
+      duration: 4.5,
+      emotion: "happy",
+      bubbleType: "normal",
+      boxStyle: "card",
+      roleIcon: "🔥"
+    },
+    {
+      id: "db-10",
+      characterId: "char-mentor",
+      text: "Hãy bắt tay vào Tuần 1 ngay hôm nay! Chúc em bảo vệ xuất sắc và đạt thủ khoa ngành CNTT nhé!",
+      startTime: 49.8,
+      duration: 4.8,
+      emotion: "happy",
+      bubbleType: "normal",
+      boxStyle: "card",
+      roleIcon: "🌟"
+    }
+  ],
+  audios: []
+};

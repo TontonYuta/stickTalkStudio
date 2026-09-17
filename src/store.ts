@@ -108,7 +108,29 @@ export const useEditorStore = create<EditorStore>((set) => ({
   setBackground: (bg) => set((state) => ({ project: { ...state.project, background: bg } })),
   setFilters: (filters) => set((state) => ({ project: { ...state.project, filters: { ...state.project.filters, ...filters } } })),
   setTitle: (title) => set((state) => ({ project: { ...state.project, title } })),
-  setDuration: (duration) => set((state) => ({ project: { ...state.project, duration } })),
+  setDuration: (duration) => set((state) => {
+    const oldDuration = state.project.duration || 15;
+    const newDuration = Math.max(3, Number(duration) || 15);
+    return {
+      project: {
+        ...state.project,
+        duration: newDuration,
+        characters: (state.project.characters || []).map(c => {
+          if ((c.startTime ?? 0) + (c.duration ?? 0) >= oldDuration - 0.5) {
+            return { ...c, duration: Math.max(1, newDuration - (c.startTime ?? 0)) };
+          }
+          return c;
+        }),
+        props: (state.project.props || []).map(p => {
+          if ((p.startTime ?? 0) + (p.duration ?? 0) >= oldDuration - 0.5) {
+            return { ...p, duration: Math.max(1, newDuration - (p.startTime ?? 0)) };
+          }
+          return p;
+        })
+      },
+      currentTime: Math.min(state.currentTime, newDuration)
+    };
+  }),
   setIsExporting: (isExporting) => set({ isExporting }),
   addCharacter: (type, imageUrl) => set((state) => {
     let appearance: CharacterAppearance = {

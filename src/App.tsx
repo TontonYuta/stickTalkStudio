@@ -15,6 +15,7 @@ import { HelpModal } from './components/HelpModal';
 import { AIModal } from './components/AIModal';
 import { ExportModal } from './components/ExportModal';
 import { QuickRerenderBar } from './components/QuickRerenderBar';
+import { QuickCreateBar } from './components/QuickCreateBar';
 
 export default function App() {
   const { project, currentTime, isPlaying } = useEditorStore();
@@ -287,6 +288,14 @@ export default function App() {
       <QuickRerenderBar 
         onOpenFullModal={() => {
           setAiModalMode('rerender');
+          setIsAIOpen(true);
+        }} 
+      />
+
+      {/* Outside Quick AI Create Video Bar (with custom duration & instant generation) */}
+      <QuickCreateBar 
+        onOpenFullModal={() => {
+          setAiModalMode('create');
           setIsAIOpen(true);
         }} 
       />

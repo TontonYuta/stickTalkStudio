@@ -29,11 +29,14 @@ export function normalizeProjectScales(project: ProjectState, targetRatio: strin
   const targetCharScale = isVertical ? 1.40 : 1.20;
   const targetPropScale = isVertical ? 1.15 : 1.05;
 
-  // Sanitize characters and guarantee valid time bounds
+  // Sanitize characters and guarantee valid time bounds covering full video duration
   if (Array.isArray(project.characters)) {
     project.characters.forEach((char, idx) => {
       char.startTime = typeof char.startTime === 'number' ? char.startTime : 0;
-      char.duration = typeof char.duration === 'number' ? char.duration : project.duration;
+      // If char was intended to span the whole video or its duration is smaller than project.duration when starting at 0
+      if (char.startTime === 0 || !char.duration || char.duration < project.duration) {
+        char.duration = project.duration;
+      }
       char.x = typeof char.x === 'number' ? char.x : (idx === 0 ? 15 : 85);
       char.y = typeof char.y === 'number' ? char.y : 75;
       char.scale = typeof char.scale === 'number' ? char.scale : 1;
@@ -51,11 +54,16 @@ export function normalizeProjectScales(project: ProjectState, targetRatio: strin
     });
   }
 
-  // Sanitize dialog blocks
-  if (Array.isArray(project.dialogBlocks)) {
+  // Sanitize dialog blocks and scale if needed to fit project duration
+  if (Array.isArray(project.dialogBlocks) && project.dialogBlocks.length > 0) {
+    const maxDialogEnd = Math.max(...project.dialogBlocks.map(db => (db.startTime || 0) + (db.duration || 3)));
+    const targetMax = Math.max(3, project.duration - 0.5);
+    const needCompression = maxDialogEnd > targetMax;
+    const compressionRatio = needCompression ? targetMax / maxDialogEnd : 1;
+
     project.dialogBlocks.forEach((db) => {
-      db.startTime = typeof db.startTime === 'number' ? db.startTime : 0;
-      db.duration = typeof db.duration === 'number' ? db.duration : 3;
+      db.startTime = typeof db.startTime === 'number' ? Number((db.startTime * compressionRatio).toFixed(2)) : 0;
+      db.duration = typeof db.duration === 'number' ? Math.max(1.8, Number((db.duration * compressionRatio).toFixed(2))) : 3;
       db.text = db.text || '';
     });
   }
@@ -215,38 +223,14 @@ export function normalizeProjectScales(project: ProjectState, targetRatio: strin
     });
   }
 
-  // 4. MATH PEDAGOGICAL ENRICHMENT (Đảm bảo có đồ thị trực quan cho chủ đề toán học)
-  const isMathVideo = /toán|hàm số|đồ thị|cực trị|đạo hàm|parabol|math|graph|tích phân|bảng biến thiên|tiếp tuyến/i.test(
+  // 4. SANITIZE UNSOLICITED CHARTS (Tuyệt đối không tự ý thêm đồ thị hàm số trừ khi người dùng yêu cầu rõ ràng)
+  const isExplicitGraphTopic = /đồ thị|vẽ đồ thị|bảng biến thiên|khảo sát hàm|tiếp tuyến|parabol|function graph|curve plot/i.test(
     (project.title || '') + ' ' + (project.dialogBlocks?.map(d => d.text).join(' ') || '')
   );
 
-  if (isMathVideo && Array.isArray(project.props)) {
-    const hasMathVisual = project.props.some(p => p.type === 'chart' || p.type === 'table' || p.type === 'math');
-    if (!hasMathVisual) {
-      // Automatically synthesize a function graph with dynamic tangent line
-      const mathPropY = isVertical ? 26 : 44;
-      project.props.push({
-        id: `prop-auto-graph-${Date.now()}`,
-        type: 'chart',
-        content: 'x^3 - 3*x',
-        x: 50,
-        y: mathPropY,
-        scale: isVertical ? 0.92 : 1.0,
-        rotation: 0,
-        startTime: 0.5,
-        duration: Math.max(8, (project.duration || 15) - 1),
-        animation: { in: 'zoomIn', out: 'fadeOut' },
-        chartConfig: {
-          chartType: 'function',
-          fn: 'x^3 - 3*x',
-          label: 'y = x^3 - 3x',
-          showTangent: true,
-          showExtrema: true,
-          showGrid: true,
-          dynamicTrace: true
-        }
-      });
-    }
+  if (!isExplicitGraphTopic && Array.isArray(project.props)) {
+    // Loại bỏ hoàn toàn đồ thị hàm số nếu chủ đề không yêu cầu rõ ràng
+    project.props = project.props.filter(p => p.type !== 'chart');
   }
 
   return project;

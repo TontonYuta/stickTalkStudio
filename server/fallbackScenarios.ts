@@ -19,7 +19,7 @@ export function getFallbackScenario(topic: string = '', options: {
   const lower = topic.toLowerCase();
 
   // Scenario 0: Mathematics, Function Graph & Simulation (Toán học & Mô phỏng Đồ thị)
-  if (lower.includes('toán') || lower.includes('hàm') || lower.includes('đồ thị') || lower.includes('math') || lower.includes('graph') || lower.includes('công thức') || lower.includes('parabol') || lower.includes('giải tích')) {
+  if (lower.includes('đồ thị') || lower.includes('khảo sát hàm') || lower.includes('bảng biến thiên') || lower.includes('tiếp tuyến') || lower.includes('parabol') || lower.includes('graph')) {
     const mathChar1X = isVertical ? 18 : 13;
     const mathChar2X = isVertical ? 82 : 87;
     const mathGroundY = isVertical ? 75 : 64;
@@ -228,6 +228,151 @@ export function getFallbackScenario(topic: string = '', options: {
           text: "Chuẩn luôn! Nắm chắc bản chất là ăn trọn điểm thi!",
           startTime: 13.3,
           duration: 2.7,
+          emotion: "explaining",
+          bubbleType: "normal"
+        }
+      ],
+      audios: []
+    };
+  }
+
+  // Scenario 0.5: AI / Chatbot / Machine Learning (Thầy vs Trò Làm Rõ AI Chatbot)
+  if (lower.includes('ai') || lower.includes('chatbot') || lower.includes('bot') || lower.includes('gpt') || lower.includes('llm') || lower.includes('máy học') || lower.includes('trí tuệ nhân tạo')) {
+    return {
+      title: "Cách AI Chatbot Hoạt Động: Bản Chất & Nguyên Lý",
+      aspectRatio,
+      dialogueStyle,
+      dialogueBoxStyle,
+      background: "bg-slate-900",
+      duration,
+      filters: { brightness: 100, contrast: 105, grayscale: 0, sepia: 0, blur: 0 },
+      characters: [
+        {
+          id: "char-teacher-ai",
+          name: "Thầy Nam AI",
+          showName: true,
+          type: "teacher",
+          x: char1X,
+          y: groundY,
+          scale: charScale,
+          flipX: false,
+          color: "#38bdf8",
+          appearance: {
+            skinColor: "#ffedd5",
+            hairColor: "#0f172a",
+            hairStyle: "short",
+            shirtColor: "#2563eb",
+            pantsColor: "#0f172a",
+            accessory: "glasses",
+            outfitStyle: "formal",
+            hasTie: true,
+            tieColor: "#0284c7",
+            hasBelt: true,
+            beltColor: "#1e293b",
+            hasPocketPen: true,
+            shoeColor: "#020617"
+          },
+          pose: { armL: 20, armR: -35, legL: 10, legR: -10, bodyLean: 2, headTilt: 0 },
+          startTime: 0,
+          duration,
+          animation: { in: "slideInLeft", inDuration: 0.7 },
+          keyframes: [
+            { id: "kf-tai-1", time: 0, x: char1X, y: groundY, scale: charScale, rotation: 0, pose: { armL: 20, armR: -35, legL: 10, legR: -10, bodyLean: 2, headTilt: 0 } },
+            { id: "kf-tai-2", time: 3.5, x: char1X + 3, y: groundY, scale: charScale, rotation: 0, pose: { armL: -110, armR: 20, legL: 15, legR: -15, bodyLean: 5, headTilt: 0 } },
+            { id: "kf-tai-3", time: 9.0, x: char1X, y: groundY, scale: charScale, rotation: 0, pose: { armL: -30, armR: -40, legL: 5, legR: -5, bodyLean: 0, headTilt: 0 } }
+          ]
+        },
+        {
+          id: "char-student-ai",
+          name: "Bạn Tí",
+          showName: true,
+          type: "student",
+          x: char2X,
+          y: groundY,
+          scale: Number((charScale * 0.95).toFixed(2)),
+          flipX: true,
+          color: "#000000",
+          appearance: {
+            skinColor: "#ffffff",
+            hairColor: "#1e293b",
+            hairStyle: "short",
+            shirtColor: "#fbbf24",
+            pantsColor: "#2563eb",
+            accessory: "cap",
+            outfitStyle: "polo",
+            hasTie: false,
+            hasBelt: true,
+            beltColor: "#334155",
+            hasPocketPen: false,
+            shoeColor: "#1f2937"
+          },
+          pose: { armL: -15, armR: 30, legL: -10, legR: 10, bodyLean: -2, headTilt: 0 },
+          startTime: 0,
+          duration,
+          animation: { in: "slideInRight", inDuration: 0.7 },
+          keyframes: [
+            { id: "kf-sai-1", time: 0, x: char2X, y: groundY, scale: Number((charScale * 0.95).toFixed(2)), rotation: 0, pose: { armL: -15, armR: 30, legL: -10, legR: 10, bodyLean: -2, headTilt: 0 } },
+            { id: "kf-sai-2", time: 3.6, x: char2X, y: groundY, scale: Number((charScale * 0.95).toFixed(2)), rotation: 0, pose: { armL: -140, armR: -20, legL: 0, legR: 0, bodyLean: 4, headTilt: 8 } },
+            { id: "kf-sai-3", time: 8.0, x: char2X - 4, y: groundY, scale: Number((charScale * 0.95).toFixed(2)), rotation: 0, pose: { armL: -150, armR: 150, legL: 0, legR: 0, bodyLean: 0, headTilt: 0 } }
+          ]
+        }
+      ],
+      props: [
+        {
+          id: "prop-robot",
+          type: "emoji",
+          content: "🤖",
+          x: char1X + 4,
+          y: groundY - 24,
+          scale: Number((propScale * 1.2).toFixed(2)),
+          rotation: 0,
+          startTime: 3.5,
+          duration: 3.5,
+          animation: { in: "bounceIn", out: "fadeOut" }
+        }
+      ],
+      dialogBlocks: [
+        {
+          id: "db-ai-1",
+          characterId: "char-student-ai",
+          roleIcon: "🎒",
+          boxStyle: dialogueBoxStyle,
+          text: "Thầy ơi! AI Chatbot có bộ não thật không mà cái gì cũng biết vậy ạ?",
+          startTime: 0.5,
+          duration: 3.2,
+          emotion: "questioning",
+          bubbleType: "normal"
+        },
+        {
+          id: "db-ai-2",
+          characterId: "char-teacher-ai",
+          roleIcon: "👨‍🏫",
+          boxStyle: dialogueBoxStyle,
+          text: "Không hề có não em nhé! Nó là cỗ máy đoán từ tiếp theo siêu tốc!",
+          startTime: 3.9,
+          duration: 3.8,
+          emotion: "explaining",
+          bubbleType: "normal"
+        },
+        {
+          id: "db-ai-3",
+          characterId: "char-student-ai",
+          roleIcon: "🎒",
+          boxStyle: dialogueBoxStyle,
+          text: "À! Giống bàn phím gợi ý từ trên điện thoại nhưng đọc cả triệu cuốn sách đúng không thầy?",
+          startTime: 7.9,
+          duration: 3.6,
+          emotion: "surprised",
+          bubbleType: "manga"
+        },
+        {
+          id: "db-ai-4",
+          characterId: "char-teacher-ai",
+          roleIcon: "👨‍🏫",
+          boxStyle: dialogueBoxStyle,
+          text: "Chính xác 100%! Biết nguyên lý rồi thì không sợ bị AI 'ảo giác' lừa nữa nhé!",
+          startTime: 11.7,
+          duration: 3.2,
           emotion: "explaining",
           bubbleType: "normal"
         }

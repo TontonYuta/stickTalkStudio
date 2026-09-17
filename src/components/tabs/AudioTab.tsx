@@ -18,10 +18,10 @@ export const AudioTab = () => {
   };
 
   const presetAudios = [
-    { name: 'Nhạc nền vui tươi', url: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_d0dfd8787f.mp3?filename=cheerful-background-music-114251.mp3' },
-    { name: 'Hồi hộp', url: 'https://cdn.pixabay.com/download/audio/2022/10/18/audio_34b3f81e35.mp3?filename=suspense-115370.mp3' },
-    { name: 'Tiếng cười (SFX)', url: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=laughing-5464.mp3' },
-    { name: 'Ting (SFX)', url: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b8f2c3d5.mp3?filename=ding-idea-40142.mp3' },
+    { name: 'Nhạc nền Lo-fi Chill (Ấm áp)', url: '/audio/bgm-lofi.mp3' },
+    { name: 'Nhạc nền Sư phạm (Thuyết trình)', url: '/audio/bgm-pedagogy.mp3' },
+    { name: 'Nhạc nền Vui tươi (Năng động)', url: '/audio/bgm-upbeat.mp3' },
+    { name: 'Nhạc nền Kịch tính (Hồi hộp)', url: '/audio/bgm-dramatic.mp3' },
   ];
 
   return (

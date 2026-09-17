@@ -55,19 +55,42 @@ StickTalk Studio là nền tảng web tạo hoạt hình 2D vector với nhân v
    # Điền GEMINI_API_KEY nếu bạn muốn gọi trực tiếp Gemini API
    ```
 
-3. **Khởi chạy môi trường phát triển**:
+### Chạy App Trực Tiếp (Standalone Desktop App - Không Cần Trình Duyệt / Localhost)
+
+StickTalk Studio đã được build thành **bản ứng dụng máy tính trực tiếp** (Desktop App với cửa sổ riêng, icon độc lập và menu hệ thống, không cần mở trình duyệt web hay gõ localhost):
+
+- **Cách 1: Khởi chạy trực tiếp từ terminal / file manager**:
+  ```bash
+  ./sticktalk-studio
+  # hoặc: npm run app
+  ```
+- **Cách 2: Mở từ Menu ứng dụng Ubuntu hoặc Desktop**:
+  - Nhấn phím `Super` (Windows) trên bàn phím, gõ **StickTalk Studio** và nhấp mở.
+  - Hoặc nhấp đúp vào biểu tượng `StickTalk Studio` ngay trên màn hình nền (`Desktop`).
+
+- **Đóng gói lại bản cài đặt độc lập (Packaged Binary)**:
+  ```bash
+  npm run build:app
+  ```
+  File thực thi độc lập được tạo tại: `dist-app/StickTalk-Studio-linux-x64/StickTalk-Studio`
+
+---
+
+### Chạy qua Web Server (Nếu muốn mở qua trình duyệt):
+
+1. **Khởi chạy môi trường phát triển**:
    ```bash
    npm run dev
    # Ứng dụng sẽ chạy tại http://localhost:3050
    ```
 
-4. **Biên dịch và chạy bản sản xuất**:
+2. **Biên dịch và chạy bản web sản xuất**:
    ```bash
    npm run build
    npm start
    ```
 
-5. **Chạy bộ kiểm thử tự động**:
+3. **Chạy bộ kiểm thử tự động**:
    ```bash
    npm test
    ```
